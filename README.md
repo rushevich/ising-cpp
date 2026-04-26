@@ -1,1 +1,1 @@
-Project to model and 
+Project to model 2D Ising Lattice
