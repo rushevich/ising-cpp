@@ -13,6 +13,7 @@ struct Observables {
     mean energy per spin
     spec heat
   */
+  double T;
   double mean_abs_m;
   double susceptibility;
   double mean_energy_per_spin;
@@ -23,7 +24,8 @@ struct Observables {
   // s3: accumulated mean energy / spin
   // s4: accumulated mean energy / spin ^2
   Observables(double s1, double s2, double s3, double s4, size_t N_spins,
-              size_t M_runs, double T) {
+              size_t M_runs, double T)
+      : T{T} {
     handle_calculations(s1, s2, s3, s4, N_spins, M_runs, T);
   };
 
@@ -32,6 +34,11 @@ struct Observables {
               << "Susceptibility: " << susceptibility << '\n'
               << "Mean energy:  " << mean_energy_per_spin << '\n'
               << "Specific heat:  " << specific_heat << '\n';
+  }
+
+  auto unpack_data() const -> std::vector<double> {
+    return std::vector<double>{T, mean_abs_m, susceptibility,
+                               mean_energy_per_spin, specific_heat};
   }
 
 private:
@@ -74,6 +81,20 @@ auto simulate(IsingLattice<dim> &lattice, double T, size_t n_therm = 2000,
                           n_prod, T);
 
   return sim_results;
+};
+
+template <size_t dim>
+auto T_sweep_sim(IsingLattice<dim> &lattice, const std::vector<double> &temps,
+                 bool init_randomly, size_t n_therm = 2000,
+                 size_t n_prod = 5000) -> std::vector<Observables> {
+  std::vector<Observables> results;
+  results.reserve(temps.size());
+  for (size_t i{}; i < temps.size(); ++i) {
+    lattice.reset(init_randomly);
+    results.push_back(simulate(lattice, temps[i]));
+  }
+
+  return results;
 };
 
 #endif

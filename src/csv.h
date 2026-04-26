@@ -1,7 +1,7 @@
 // csv.h
 #ifndef ISINGCPP_CSV_H
 #define ISINGCPP_CSV_H
-#include <fstream>
+#include <initializer_list>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -14,14 +14,27 @@ and manipulate a vector as an analog.
 
 class CSV {
 public:
-  CSV() noexcept;
-  void emit_CSV();
-  friend std::ostream &operator<<(std::ostream &o, CSV &csv);
-  friend std::istream &operator>>(std::istream &i, CSV &csv);
+  CSV() = delete; // delete for now until we design more infra
+  CSV(std::initializer_list<std::string> header) noexcept;
+  void emit_CSV(std::string filename) const;
+  friend std::ostream &operator<<(std::ostream &o, const CSV &csv);
+  friend std::istream &operator>>(std::istream &i, const CSV &csv);
+  auto lines() const -> size_t;
+  auto fields() const -> size_t { return csv_header_.size(); };
+  auto header() const -> const std::vector<std::string> & {
+    return csv_header_;
+  };
+  auto data() const -> const std::vector<std::vector<double>> & {
+    return csv_data_;
+  }
+  auto begin_lines() const { return csv_data_.begin(); };
+  auto end_lines() const { return csv_data_.end(); };
+
+  void insert_line(std::vector<double> data) { csv_data_.push_back(data); };
 
 private:
-  std::fstream file;
-  std::vector<std::vector<std::string>> csv;
+  std::vector<std::string> csv_header_;
+  std::vector<std::vector<double>> csv_data_;
 };
 
 #endif
