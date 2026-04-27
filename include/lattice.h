@@ -1,3 +1,4 @@
+// lattice.h
 #ifndef ISINGCPP_LATTICE_H
 #define ISINGCPP_LATTICE_H
 
@@ -9,7 +10,7 @@
 #include <numeric>
 #include <random>
 
-template <size_t dim> class IsingLattice {
+class IsingLattice {
   auto index(size_t row, size_t col) const -> size_t {
     // L * row + col
     size_t index = L_ * row + col;
@@ -29,30 +30,25 @@ template <size_t dim> class IsingLattice {
   };
 
 public:
-  IsingLattice(bool init_randomly)
-      : rng_([]() {
-          std::random_device rd;
-          return rd();
-        }()),
+  IsingLattice(size_t L, bool init_randomly)
+      : L_{L}, N_{L * L}, random_{init_randomly}, rng_(std::random_device{}()),
         real_dist_(0, 1), int_dist_(0, N_ - 1) {
-    if (!init_randomly) {
+    spins_.reserve(N_);
+    if (!random_) {
       for (size_t i{}; i < N_; ++i)
-        spins_[i] = 1;
+        spins_.push_back(1);
     } else {
       std::uniform_int_distribution<int> spin_gen(0, 1);
       for (size_t i{}; i < N_; ++i) {
-        spins_[i] = (spin_gen(rng_)) ? 1 : -1;
+        spins_.push_back((spin_gen(rng_)) ? 1 : -1);
       }
     }
 
-    next_[L_ - 1] = 0;
-    for (size_t i{}; i < L_ - 1; ++i) {
-      next_[i] = i + 1;
-    }
-
-    prev_[0] = L_ - 1;
-    for (size_t i{L_ - 1}; 0 < i; --i) {
-      prev_[i] = i - 1;
+    next_.reserve(L_);
+    prev_.reserve(L_);
+    for (size_t i{}; i < L_; ++i) {
+      next_.push_back((i + 1) % L_);
+      prev_.push_back((i + L_ - 1) % L_);
     }
   };
 
@@ -96,7 +92,7 @@ public:
 
   // total energy / spin of current config
   auto energy() const -> double {
-    int sum{};
+    int64_t sum{};
     for (size_t i{}; i < N_; ++i) {
       size_t row = i / L_;
       size_t col = i % L_;
@@ -112,8 +108,8 @@ public:
   /* Utilities */
   auto size() const -> size_t { return N_; };
   auto sideLength() const -> size_t { return L_; };
-  void reset(bool init_randomly) {
-    if (!init_randomly) {
+  void reset() {
+    if (!random_) {
       for (size_t i{}; i < N_; ++i)
         spins_[i] = 1;
     } else {
@@ -134,11 +130,12 @@ public:
   }
 
 private:
-  static constexpr size_t L_ = dim;
-  static constexpr size_t N_ = dim * dim;
-  std::array<int8_t, N_> spins_;
-  std::array<size_t, L_> next_;
-  std::array<size_t, L_> prev_;
+  size_t L_;
+  size_t N_;
+  bool random_;
+  std::vector<int8_t> spins_;
+  std::vector<size_t> next_;
+  std::vector<size_t> prev_;
   std::mt19937 rng_;
   std::uniform_real_distribution<double> real_dist_;
   std::uniform_int_distribution<size_t> int_dist_;
