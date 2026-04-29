@@ -53,6 +53,8 @@ auto parse_options(int argc, char *argv[]) -> Options {
   bool saw_o = false;
   bool saw_s = false;
   bool saw_r = false;
+  bool saw_p = false;
+  bool saw_h = false;
 
   for (size_t i{}; i < args.size(); ++i) {
     const auto &arg = args[i];
@@ -110,6 +112,30 @@ auto parse_options(int argc, char *argv[]) -> Options {
       saw_r = true;
       continue;
     }
+
+    if (arg == "-p") {
+      if (saw_p)
+        throw;
+      if (ARG_CHECK(i + 1, args))
+        throw;
+      opts.prod_steps = parse_size(args[++i], arg);
+      if (opts.prod_steps <= 0)
+        throw;
+      saw_p = true;
+      continue;
+    }
+
+    if (arg == "-h") {
+      if (saw_h)
+        throw;
+      if (ARG_CHECK(i + 1, args))
+        throw;
+      opts.therm_steps = parse_size(args[++i], arg);
+      if (opts.therm_steps <= 0)
+        throw;
+      saw_h = true;
+      continue;
+    }
     throw;
   }
   if (!saw_L)
@@ -135,7 +161,8 @@ void run(const Options &opts) {
   IsingLattice lattice(opts.lattice_size, opts.random_init);
   std::vector<double> temps =
       construct_T_vec(opts.temp_min, opts.temp_max, opts.step_size);
-  auto results = simulation::T_sweep_sim(lattice, temps);
+  auto results = simulation::T_sweep_sim(lattice, temps, opts.therm_steps,
+                                         opts.prod_steps);
 
   CSV results_csv({"Temp", "Mean Absolute Magnetization", "Susceptibility",
                    "Mean Energy / Spin", "Specific Heat"});

@@ -11,7 +11,9 @@ struct Options {
   double temp_max = 0.0;    // -T second val *
   bool random_init = false; // -r
   double step_size = 0.1;   // -s
-  std::string output_file;  // -o *
+  size_t prod_steps = 5000;
+  size_t therm_steps = 2000;
+  std::string output_file; // -o *
 };
 
 auto parse_int(std::string_view s, std::string_view flag) -> int;
