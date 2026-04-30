@@ -37,7 +37,7 @@ auto T_sweep_sim(IsingLattice &lattice, const std::vector<double> &temps,
   const auto start_time = std::chrono::system_clock::now();
   for (size_t i{}; i < temps.size(); ++i) {
     // lattice.reset();
-    results.push_back(simulate(lattice, temps[i]));
+    results.push_back(simulate(lattice, temps[i], n_therm, n_prod));
   }
   const auto stop_time = std::chrono::system_clock::now();
 

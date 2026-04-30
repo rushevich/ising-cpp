@@ -61,53 +61,53 @@ auto parse_options(int argc, char *argv[]) -> Options {
 
     if (arg == "-L") {
       if (saw_L)
-        throw;
+        throw std::runtime_error("-L specified more than once");
       if (ARG_CHECK(i + 1, args))
-        throw;
+        throw std::runtime_error("-L: missing lattice size value");
       opts.lattice_size = parse_size(args[++i], arg);
-      if (opts.lattice_size <= 0)
-        throw;
+      if (opts.lattice_size == 0)
+        throw std::runtime_error("-L: lattice size must be positive");
       saw_L = true;
       continue;
     }
     if (arg == "-T") {
       if (saw_T)
-        throw;
+        throw std::runtime_error("-T specified more than once");
       if (ARG_CHECK(i + 2, args))
-        throw;
+        throw std::runtime_error("-T: requires two values (min and max)");
       opts.temp_min = parse_double(args[++i], arg);
       opts.temp_max = parse_double(args[++i], arg);
       if (opts.temp_min > opts.temp_max)
-        throw;
+        throw std::runtime_error("-T: min temperature exceeds max");
       if (opts.temp_min < 0.0)
-        throw;
+        throw std::runtime_error("-T: temperature must be non-negative");
       saw_T = true;
       continue;
     }
     if (arg == "-o") {
       if (saw_o)
-        throw;
+        throw std::runtime_error("-o specified more than once");
       if (ARG_CHECK(i + 1, args))
-        throw;
+        throw std::runtime_error("-o: missing output filename");
       opts.output_file = std::string(args[++i]);
       saw_o = true;
       continue;
     }
     if (arg == "-s") {
       if (saw_s)
-        throw;
+        throw std::runtime_error("-s specified more than once");
       if (ARG_CHECK(i + 1, args))
-        throw;
+        throw std::runtime_error("-s: missing step size value");
       opts.step_size = parse_double(args[++i], arg);
       if (opts.step_size <= 0.0)
-        throw;
+        throw std::runtime_error("-s: step size must be positive");
       saw_s = true;
       continue;
     }
 
     if (arg == "-r") {
       if (saw_r)
-        throw;
+        throw std::runtime_error("-r specified more than once");
       opts.random_init = true;
       saw_r = true;
       continue;
@@ -115,35 +115,35 @@ auto parse_options(int argc, char *argv[]) -> Options {
 
     if (arg == "-p") {
       if (saw_p)
-        throw;
+        throw std::runtime_error("-p specified more than once");
       if (ARG_CHECK(i + 1, args))
-        throw;
+        throw std::runtime_error("-p: missing production sweeps value");
       opts.prod_steps = parse_size(args[++i], arg);
       if (opts.prod_steps <= 0)
-        throw;
+        throw std::runtime_error("-p: production sweeps must be positive");
       saw_p = true;
       continue;
     }
 
     if (arg == "-h") {
       if (saw_h)
-        throw;
+        throw std::runtime_error("-h specified more than once");
       if (ARG_CHECK(i + 1, args))
-        throw;
+        throw std::runtime_error("-h: missing thermalization sweeps value");
       opts.therm_steps = parse_size(args[++i], arg);
       if (opts.therm_steps <= 0)
-        throw;
+        throw std::runtime_error("-h: thermalization sweeps must be positive");
       saw_h = true;
       continue;
     }
-    throw;
+    throw std::runtime_error("Unknown argument: " + std::string(arg));
   }
   if (!saw_L)
-    throw;
+    throw std::runtime_error("-L is required");
   if (!saw_T)
-    throw;
+    throw std::runtime_error("-T is required");
   if (!saw_o)
-    throw;
+    throw std::runtime_error("-o is required");
 
   return opts;
 };

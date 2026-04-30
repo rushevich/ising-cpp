@@ -18,8 +18,8 @@ public:
   CSV(std::initializer_list<std::string> header) noexcept;
   void emit_CSV(std::string filename) const;
   friend std::ostream &operator<<(std::ostream &o, const CSV &csv);
-  friend std::istream &operator>>(std::istream &i, const CSV &csv);
-  auto lines() const -> size_t;
+  // friend std::istream &operator>>(std::istream &i, const CSV &csv);
+  // auto lines() const -> size_t;
   auto fields() const -> size_t { return csv_header_.size(); };
   auto header() const -> const std::vector<std::string> & {
     return csv_header_;
